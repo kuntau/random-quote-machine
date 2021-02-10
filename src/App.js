@@ -4,19 +4,53 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitterSquare, faFacebookSquare } from "@fortawesome/free-brands-svg-icons";
 
 function App() {
+  const [ quoteList, setQuoteList ] = useState([])
   const [ quote, setQuote ] = useState(quotesList[0].quote)
   const [ author, setAuthor ] = useState(quotesList[0].author)
-  const [ color, setColor ] = useState(quotesList[0].color)
+  const [ color, setColor ] = useState(colors[0])
+
+  const QUOTES_URL = 'https://gist.githubusercontent.com/camperbot/5a022b72e96c4c9585c32bf6a75f62d9/raw/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json'
 
   const getNewQuote = () => {
-    const randomNumber = Math.floor(Math.random() * quotesList.length)
-    setQuote(quotesList[randomNumber].quote)
-    setAuthor(quotesList[randomNumber].author)
-    setColor(quotesList[randomNumber].color)
+    const randomQuote = getRandomFromArray(quoteList)
+
+    setQuote(randomQuote.quote)
+    setAuthor(randomQuote.author)
+    setColor(getRandomFromArray(colors))
+  }
+
+  const getRandomFromArray = (arr) => {
+    const randomNumber = Math.floor(Math.random() * arr.length)
+    return arr[randomNumber]
+  }
+
+  const getQuoteList = async () => {
+    try {
+      const list = await fetch(QUOTES_URL)
+      const res = await list.json()
+      const quotes = await res.quotes
+      setQuoteList(quotes)
+    console.log("async", quotes);
+    } catch (e) {
+      console.error("Error in getQuoteList", e)
+    }
+  }
+
+  const getQuoteListAlt = () => {
+    fetch(QUOTES_URL, { headers: { 'Accept': 'application/json', } })
+      .then(res => res.json())
+      .then(result => {
+        setQuoteList(result.quotes)
+      })
+      .then(() => getNewQuote())
+      .then(() => console.log(quoteList))
+      .catch(e => console.error(e))
   }
 
   useEffect( () => {
-    getNewQuote()
+
+    getQuoteList()
+
   }, [])
 
   return (
@@ -101,5 +135,20 @@ const quotesList = [
     author: 'Nizam Man',
     color: '#43a047'
   }
+]
+
+const colors = [
+  '#16a085',
+  '#27ae60',
+  '#2c3e50',
+  '#f39c12',
+  '#e74c3c',
+  '#9b59b6',
+  '#FB6964',
+  '#342224',
+  '#472E32',
+  '#BDBB99',
+  '#77B1A9',
+  '#73A857'
 ]
 export default App;
